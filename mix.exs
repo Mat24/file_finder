@@ -6,6 +6,7 @@ defmodule FileFinder.Mixfile do
       app: :file_finder,
       version: "0.1.0",
       elixir: "~> 1.5",
+      escript: [main_module: Commandline.CLI],
       start_permanent: Mix.env == :prod,
       deps: deps()
     ]

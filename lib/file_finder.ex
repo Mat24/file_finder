@@ -1,40 +1,33 @@
-# defmodule FileFinder do
-#   def main(orig_path, filename, acc) do
+defmodule FileFinder do
+    def main(args) do
+      find_result = args
+        |> finder([])
+        |> List.flatten
+      IO.inspect find_result
+    end
+  
+    def finder([path: path, filename: exp], acc) do 
+        files = case File.ls(path) do
+            {:ok, result} -> result
+            {:error, _} -> []
+        end
      
-#     [orig_path: orig_path, filename: filename]
-#      |> validate_and_change_dir
-#      |> list_dir_content
-#      |> file_finder(filename,acc)
-
-#   end
-
-#   def validate_and_change_dir(keymap_values) do
-#     case File.cd(keymap_values[:orig_path]) do
-#       :ok -> keymap_values
-#       _ -> raise "Directorio no valido: #{keymap_values[:orig_path]}"
-#     end
-#   end
-
-#   def list_dir_content(keymap_values) doext install iampeterbanjo.elixirlinter
-#     {:ok, content_list} = File.ls
-#     content_list
-#   end
-
-#   def file_finder(file_list, filename,acc), do: file_finderp(file_list, filename, acc)
-
-#   defp file_finderp([], _filename, acc), do: acc
-
-#   defp file_finderp([head | tail], filename, acc) do
-#     IO.puts "Elemento actual: #{head}, #{head == filename}"
-#     {:ok, pwd} = File.cwd
-#     cond do
-#       head == filename -> file_finderp(tail, filename, ["Archivo encontrado en: #{pwd}/#{filename}" | acc])
-#       File.dir?(head) -> file_finderp(main("#{head}", filename, acc), filename)
-#       True -> file_finderp(tail, filename, acc)
-#     end
-    
-#   end
-
-# end
-
-
+     finder(files, path, exp, acc)
+    end
+  
+    def finder([], _actual_path, _exp, acc), do: acc
+  
+    def finder({:ok, files}, actual_path, exp, acc), do: finder(files, actual_path, exp, acc)
+  
+    def finder([head | tail], actual_path, exp, acc) do
+      IO.puts "Processing... #{Path.join(actual_path,head)}"
+      case File.dir? head do
+        true ->
+              new_path = Path.join(actual_path,head)
+              subfinder = finder([path: new_path, filename: exp], []) 
+              finder(tail, actual_path, exp, [subfinder | acc])
+        false when head == exp -> finder(tail, actual_path, exp, ["#{actual_path}/#{exp}"|acc])
+        false -> finder(tail, actual_path, exp, acc)
+      end
+    end
+end
